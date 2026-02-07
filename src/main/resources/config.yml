@@ -7,6 +7,16 @@ debug:
 
 # Global settings
 settings:
+  #whether to enable the /scroll buy command
+  buyScrolls:
+    enabled: false
+    useVault: true
+    #if useVault is false it will use commands
+    #i recommend setting useVault to true because
+    #if you use commands with eco there a change players balance could go negative
+    command: "eco take %player% %price%"
+    #all scrolls cost the same amount. but if you want certain abilities to be more expensive you can increase their unlock count
+    price: 100
   # Ability Levelling
   abilityLevelling:
     enabled: false # Globally toggles the per scrolls maxReads and attribute scaling system
@@ -66,6 +76,7 @@ elementColors:
   HEALING: "&a"
   PLANT: "&a"
   BLOOD: "&4"
+  MYSTERY: "&5"
 
 # Messages
 messages:
@@ -102,12 +113,19 @@ messages:
   naturalDrop: "&aThe &e%entity%&a dropped a(n) &e%scroll% &ascroll!"
   trialDrop: ""
   chestDrop: ""
-  
+
   # Command messages
   commands:
     give:
       usage: "&cUsage: /scroll give <player> <ability> [amount]"
       success: "&aGave %amount% %scroll% scroll(s) to %player%"
+    buy:
+      usage: "&cUsage: /scroll buy <ability> [amount]"
+      success: "&aYou bought %amount% %scroll% scroll(s) for %price%"
+      insufficientFunds: "&cError: You have insufficent funds"
+      disabled: "&cBuying scrolls is disabled on this server" #set settings.buyScrolls.enabled to true to enable this
+      notPlayer: "&cThis command can only be run by players"
+      noVault: "&cNo vault plugin was found"
     progress:
       header: "&8&m-----------------------------------------------------"
       title: "&b&lScroll Progress"

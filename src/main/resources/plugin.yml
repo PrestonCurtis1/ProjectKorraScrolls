@@ -17,4 +17,7 @@ permissions:
     default: op
   pkscrolls.progress:
     description: Allows players to view their scroll progress
-    default: true 
+    default: true
+  pkscrolls.buy:
+    description: Allow players to buy scrolls
+    default: true

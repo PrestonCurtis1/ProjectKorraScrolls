@@ -18,6 +18,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import net.milkbowl.vault.economy.Economy;
 
 import java.util.*;
 
@@ -39,6 +40,7 @@ public class ScrollCommand implements CommandExecutor, TabCompleter {
 
         switch (args[0].toLowerCase()) {
             case "give" -> handleGive(sender, args);
+            case "buy" -> handleBuy(sender, args);
             case "progress" -> handleProgress(sender, args);
             case "reset" -> handleReset(sender, args);
             case "reload" -> handleReload(plugin, sender);
@@ -95,7 +97,84 @@ public class ScrollCommand implements CommandExecutor, TabCompleter {
             .replace("%player%", target.getName())));
         return true;
     }
+    private boolean handleBuy(CommandSender sender, String[] args){
+        ProjectKorraScrolls.getInstance().debugLog("Processing buy command from " + sender.getName() + " with args: " + String.join(" ", args));
+        if (!plugin.getConfigManager().getConfig().getBoolean("settings.buyScrolls.enabled",false)){
+            sender.sendMessage(ColorUtils.formatMessage(plugin.getConfigManager().getMessage("commands.buy.disabled")));
+            return true;
+        }
 
+        if (!sender.hasPermission("pkscrolls.buy")) {
+            ProjectKorraScrolls.getInstance().debugLog("Permission denied for " + sender.getName());
+            sender.sendMessage(ColorUtils.formatMessage(plugin.getConfigManager().getMessage("noPermission")));
+            return true;
+        }
+
+        if (args.length < 2) {
+            ProjectKorraScrolls.getInstance().debugLog("Invalid arguments length: " + args.length);
+            sender.sendMessage(ColorUtils.formatMessage(plugin.getConfigManager().getMessage("commands.buy.usage")));
+            return true;
+        }
+        Player target = (sender instanceof Player) ? Bukkit.getPlayer(sender.getName()) : null;
+        if (target == null) {
+            ProjectKorraScrolls.getInstance().debugLog("Sender is not a player " + sender.getName());
+            sender.sendMessage(ColorUtils.formatMessage(plugin.getConfigManager().getMessage("commands.buy.notPlayer")));
+            return true;
+        }
+
+        String abilityName = args[1];
+        Scroll scroll = plugin.getScrollManager().getScroll(abilityName);
+        if (scroll == null) {
+            ProjectKorraScrolls.getInstance().debugLog("Invalid ability name: " + abilityName);
+            sender.sendMessage(ColorUtils.formatMessage(plugin.getConfigManager().getMessage("invalidAbility")));
+            return true;
+        }
+
+        int amount = args.length > 2 ? Integer.parseInt(args[2]) : 1;
+        ProjectKorraScrolls.getInstance().debugLog("Creating " + amount + " scroll(s) of " + abilityName + " for " + target.getName());
+        int price = plugin.getConfigManager().getConfig().getInt("settings.buyScrolls.price",100);
+        double total = amount*price;
+        boolean success;
+        ProjectKorraScrolls.getInstance().debugLog(plugin.getConfigManager().getConfig().getBoolean("settings.buyScrolls.useVault",true)+"");
+        if (plugin.getConfigManager().getConfig().getBoolean("settings.buyScrolls.useVault",true)){
+            success = false;
+            Economy economy = ProjectKorraScrolls.getEconomy();
+           if(economy == null){
+               ProjectKorraScrolls.getInstance().debugLog("Exiting command due to no vault plugin found");
+               sender.sendMessage(ColorUtils.formatMessage(plugin.getConfigManager().getMessage("commands.buy.noVault")));
+               return true;
+           }
+           double balance = economy.getBalance(target);
+           if (balance >= total){
+               economy.withdrawPlayer(target,total);
+               success = true;
+           }
+        } else {
+            success = Bukkit.dispatchCommand(
+                    Bukkit.getConsoleSender(),
+                    plugin.getConfigManager().getConfig().getString("settings.buyScrolls.command","eco take %player% %price%")
+                            .replace("%player%", target.getName())
+                            .replace("%price%", total + "")
+            );
+        }
+        if (!success){
+            ProjectKorraScrolls.getInstance().debugLog("insufficent funds for " + sender.getName());
+            sender.sendMessage(ColorUtils.formatMessage(plugin.getConfigManager().getMessage("commands.buy.insufficientFunds")));
+            return true;
+        }
+
+        ItemStack scrollItem = ScrollItemFactory.createScroll(scroll);
+        scrollItem.setAmount(amount);
+        target.getInventory().addItem(scrollItem);
+
+        ProjectKorraScrolls.getInstance().debugLog("Successfully gave scrolls to " + target.getName());
+        sender.sendMessage(ColorUtils.formatMessage(plugin.getConfigManager().getMessage("commands.buy.success")
+                .replace("%amount%", amount+"")
+                .replace("%price%", total+"")
+                .replace("%scroll%", scroll.getDisplayName())
+        ));
+        return true;
+    }
     private boolean handleProgress(CommandSender sender, String[] args) {
         if (args.length == 1) {
             if (!(sender instanceof Player)) {
@@ -546,6 +625,7 @@ public class ScrollCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 1) {
             completions.addAll(List.of("give", "progress", "reset", "reload", "resetearlygame", "resetprogress", "page"));
+            if(plugin.getConfigManager().getConfig().getBoolean("settings.buyScrolls.enabled",false) && sender.hasPermission("pkscrolls.buy"))completions.add("buy");
         } else if (args.length == 2) {
             switch (args[0].toLowerCase()) {
                 case "give", "progress", "reset", "resetearlygame", "resetprogress" -> {
@@ -556,6 +636,11 @@ public class ScrollCommand implements CommandExecutor, TabCompleter {
                     }
                 }
                 case "page" -> completions.addAll(List.of("next", "prev"));
+                case "buy" -> {
+                    if (sender.hasPermission("pkscrolls.buy") && plugin.getConfigManager().getConfig().getBoolean("settings.buyScrolls.enabled",false)){
+                        completions.addAll(plugin.getScrollManager().getAbilityNames());
+                    }
+                }
             }
         } else if (args.length == 3 && args[0].equalsIgnoreCase("give")) {
             if (sender.hasPermission("pkscrolls.admin")) {
