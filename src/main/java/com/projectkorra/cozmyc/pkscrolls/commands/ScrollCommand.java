@@ -139,7 +139,7 @@ public class ScrollCommand implements CommandExecutor, TabCompleter {
         ProjectKorraScrolls.getInstance().debugLog(plugin.getConfigManager().getConfig().getBoolean("settings.buyScrolls.useVault",true)+"");
         if (plugin.getConfigManager().getConfig().getBoolean("settings.buyScrolls.useVault",true)){
             success = false;
-            if(VaultHook.hasEconomy()){
+            if(!VaultHook.hasEconomy()){
                 ProjectKorraScrolls.getInstance().debugLog("Exiting command due to no vault plugin found");
                 sender.sendMessage(ColorUtils.formatMessage(plugin.getConfigManager().getMessage("commands.buy.noVault")));
                 return true;

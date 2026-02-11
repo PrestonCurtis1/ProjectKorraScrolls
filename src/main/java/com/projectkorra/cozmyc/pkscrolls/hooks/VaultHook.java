@@ -18,7 +18,7 @@ public class VaultHook {
             return false;
         }
         economy = rsp.getProvider();
-        return hasEconomy();
+        return economy != null;
     }
     public static Economy getEconomy() {
         return economy;
