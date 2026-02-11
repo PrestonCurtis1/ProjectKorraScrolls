@@ -2,21 +2,16 @@ package com.projectkorra.cozmyc.pkscrolls;
 
 import com.projectkorra.cozmyc.pkscrolls.commands.ScrollCommand;
 import com.projectkorra.cozmyc.pkscrolls.hooks.ScrollAbilityHooks;
+import com.projectkorra.cozmyc.pkscrolls.hooks.VaultHook;
 import com.projectkorra.cozmyc.pkscrolls.listeners.*;
 import com.projectkorra.cozmyc.pkscrolls.managers.ConfigManager;
 import com.projectkorra.cozmyc.pkscrolls.managers.PlayerDataManager;
 import com.projectkorra.cozmyc.pkscrolls.managers.ScrollManager;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import net.milkbowl.vault.chat.Chat;
-import net.milkbowl.vault.economy.Economy;
-import net.milkbowl.vault.economy.EconomyResponse;
-import net.milkbowl.vault.permission.Permission;
 
 public class ProjectKorraScrolls extends JavaPlugin {
-    private static Economy economy = null;
     private static ProjectKorraScrolls instance;
 
     private ConfigManager configManager;
@@ -55,30 +50,20 @@ public class ProjectKorraScrolls extends JavaPlugin {
             scrollManager.loadAbilities(); // Load scroll configs and add new defaults
         }, 1L);
 
-        getLogger().info("PKScrolls has been enabled!");
-        if (!setupEconomy()){
-            getLogger().info("Vault plugin not found. buy feature will not properly.");
+        if (VaultHook.setupEconomy()) {
+            getLogger().info("Vault hooked successfully.");
+        } else {
+            getLogger().warning("Vault not found. Economy features (like /buy) will be disabled.");
         }
+
+        getLogger().info("PKScrolls has been enabled!");
     }
 
     @Override
     public void onDisable() {
         getLogger().info("PKScrolls has been disabled!");
     }
-    private boolean setupEconomy() {
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            return false;
-        }
-        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) {
-            return false;
-        }
-        economy = rsp.getProvider();
-        return economy != null;
-    }
-    public static Economy getEconomy() {
-        return economy;
-    }
+
     public void debugLog(String message) {
         if (isDebugging()) {
             instance.getLogger().info("[DEBUG] " + message);

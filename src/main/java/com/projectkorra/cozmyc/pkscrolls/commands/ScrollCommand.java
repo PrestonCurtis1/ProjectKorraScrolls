@@ -1,6 +1,7 @@
 package com.projectkorra.cozmyc.pkscrolls.commands;
 
 import com.projectkorra.cozmyc.pkscrolls.ProjectKorraScrolls;
+import com.projectkorra.cozmyc.pkscrolls.hooks.VaultHook;
 import com.projectkorra.cozmyc.pkscrolls.managers.PlayerDataManager;
 import com.projectkorra.cozmyc.pkscrolls.models.Scroll;
 import com.projectkorra.cozmyc.pkscrolls.utils.ColorUtils;
@@ -138,17 +139,17 @@ public class ScrollCommand implements CommandExecutor, TabCompleter {
         ProjectKorraScrolls.getInstance().debugLog(plugin.getConfigManager().getConfig().getBoolean("settings.buyScrolls.useVault",true)+"");
         if (plugin.getConfigManager().getConfig().getBoolean("settings.buyScrolls.useVault",true)){
             success = false;
-            Economy economy = ProjectKorraScrolls.getEconomy();
-           if(economy == null){
-               ProjectKorraScrolls.getInstance().debugLog("Exiting command due to no vault plugin found");
-               sender.sendMessage(ColorUtils.formatMessage(plugin.getConfigManager().getMessage("commands.buy.noVault")));
-               return true;
-           }
-           double balance = economy.getBalance(target);
-           if (balance >= total){
-               economy.withdrawPlayer(target,total);
-               success = true;
-           }
+            if(VaultHook.hasEconomy()){
+                ProjectKorraScrolls.getInstance().debugLog("Exiting command due to no vault plugin found");
+                sender.sendMessage(ColorUtils.formatMessage(plugin.getConfigManager().getMessage("commands.buy.noVault")));
+                return true;
+            }
+            Economy economy = VaultHook.getEconomy();
+            double balance = economy.getBalance(target);
+            if (balance >= total){
+                economy.withdrawPlayer(target,total);
+                success = true;
+            }
         } else {
             success = Bukkit.dispatchCommand(
                     Bukkit.getConsoleSender(),

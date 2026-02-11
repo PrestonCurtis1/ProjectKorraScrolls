@@ -3,7 +3,7 @@ version: '${project.version}'
 main: com.projectkorra.cozmyc.pkscrolls.ProjectKorraScrolls
 api-version: '1.21.4'
 depend: [ProjectKorra]
-soft-depend: [JedCore, ProjectAddons, Hyperion, Cloudy]
+soft-depend: [JedCore, ProjectAddons, Hyperion, Cloudy, Vault]
 authors: [Cozmyc]
 description: A plugin that adds consumable scroll items to unlock bending abilities
 commands:
