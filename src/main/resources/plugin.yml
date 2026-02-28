@@ -10,7 +10,7 @@ commands:
   scrolls:
     description: Main command for PKScrolls
     usage: /scrolls <give|progress|reset|reload>
-    aliases: [bendingscrolls, bscrolls, pkscrolls]
+    aliases: [bendingscrolls, bscrolls, pkscrolls, scroll]
 permissions:
   pkscrolls.admin:
     description: Gives access to all PKScrolls commands

@@ -111,7 +111,7 @@ public class ScrollCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (args.length < 2) {
+        if (args.length < 2 || args.length > 3) {
             ProjectKorraScrolls.getInstance().debugLog("Invalid arguments length: " + args.length);
             sender.sendMessage(ColorUtils.formatMessage(plugin.getConfigManager().getMessage("commands.buy.usage")));
             return true;
@@ -130,8 +130,14 @@ public class ScrollCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(ColorUtils.formatMessage(plugin.getConfigManager().getMessage("invalidAbility")));
             return true;
         }
-
-        int amount = args.length > 2 ? Integer.parseInt(args[2]) : 1;
+        int amount;
+        try {
+            amount = args.length > 2 ? Integer.parseInt(args[2]) : 1;
+        } catch (NumberFormatException e){
+            ProjectKorraScrolls.getInstance().debugLog("args[2] must be integer: " + args[2]);
+            sender.sendMessage(ColorUtils.formatMessage(plugin.getConfigManager().getMessage("commands.buy.usage")));
+            return true;
+        }
         ProjectKorraScrolls.getInstance().debugLog("Creating " + amount + " scroll(s) of " + abilityName + " for " + target.getName());
         int price = plugin.getConfigManager().getConfig().getInt("settings.buyScrolls.price",100);
         double total = amount*price;

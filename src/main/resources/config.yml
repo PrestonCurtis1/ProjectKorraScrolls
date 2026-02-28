@@ -1,4 +1,4 @@
-# ProjectKorraScrolls Configuration
+﻿# ProjectKorraScrolls Configuration
 
 # Debug settings
 debug:
@@ -13,7 +13,9 @@ settings:
     useVault: true
     #if useVault is false it will use commands
     #i recommend setting useVault to true because
-    #if you use commands with eco there a change players balance could go negative
+    #if you use commands it does not check for insufficient funds so balance could go negative
+    #you will have to add a command that check for insufficient funds iteself
+    #make sure the commands return false for insufficient funds when run by Bukkit.dispatchCommand()
     command: "eco take %player% %price%"
     #all scrolls cost the same amount. but if you want certain abilities to be more expensive you can increase their unlock count
     price: 100
