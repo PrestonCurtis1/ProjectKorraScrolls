@@ -13,6 +13,7 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -128,6 +129,12 @@ public class ScrollCommand implements CommandExecutor, TabCompleter {
         if (scroll == null) {
             ProjectKorraScrolls.getInstance().debugLog("Invalid ability name: " + abilityName);
             sender.sendMessage(ColorUtils.formatMessage(plugin.getConfigManager().getMessage("invalidAbility")));
+            return true;
+        }
+        boolean inventoryFull = target.getInventory().firstEmpty() == -1;
+        if (inventoryFull) {
+            ProjectKorraScrolls.getInstance().debugLog("inventory is full" + target.getName());
+            sender.sendMessage(ColorUtils.formatMessage(plugin.getConfigManager().getMessage("commands.buy.inventoryfull")));
             return true;
         }
         int amount;
